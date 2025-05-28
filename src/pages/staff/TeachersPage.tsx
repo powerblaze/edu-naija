@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Download, Filter, Plus, Search, UserPlus, MoreHorizontal, Eye, Edit, Trash } from 'lucide-react';
+import AddEditTeacher from './AddEditTeacher';
+import AssignTeacher from './AssignTeacher';
 
 // Mock data for teachers
 const MOCK_TEACHERS = [
@@ -32,90 +34,7 @@ const MOCK_TEACHERS = [
     qualification: 'B.A. English Literature',
     photo: 'https://randomuser.me/api/portraits/women/44.jpg',
   },
-  {
-    id: 'TCH003',
-    staffId: 'STF2024003',
-    firstName: 'Ibrahim',
-    lastName: 'Mohammed',
-    position: 'Social Studies Teacher',
-    department: 'Social Sciences',
-    phoneNumber: '080-3456-7890',
-    email: 'ibrahim.mohammed@edunaija.com',
-    dateEmployed: new Date('2017-09-01'),
-    status: 'active',
-    qualification: 'B.Sc. Sociology',
-    photo: 'https://randomuser.me/api/portraits/men/22.jpg',
-  },
-  {
-    id: 'TCH004',
-    staffId: 'STF2024004',
-    firstName: 'Chioma',
-    lastName: 'Adeyemi',
-    position: 'Biology Teacher',
-    department: 'Sciences',
-    phoneNumber: '080-4567-8901',
-    email: 'chioma.adeyemi@edunaija.com',
-    dateEmployed: new Date('2020-09-01'),
-    status: 'active',
-    qualification: 'B.Sc. Biology',
-    photo: 'https://randomuser.me/api/portraits/women/65.jpg',
-  },
-  {
-    id: 'TCH005',
-    staffId: 'STF2024005',
-    firstName: 'Oluwaseun',
-    lastName: 'Adeleke',
-    position: 'Computer Studies Teacher',
-    department: 'Sciences',
-    phoneNumber: '080-5678-9012',
-    email: 'oluwaseun.adeleke@edunaija.com',
-    dateEmployed: new Date('2021-09-01'),
-    status: 'active',
-    qualification: 'B.Sc. Computer Science',
-    photo: 'https://randomuser.me/api/portraits/men/45.jpg',
-  },
-  {
-    id: 'TCH006',
-    staffId: 'STF2024006',
-    firstName: 'Fatima',
-    lastName: 'Bello',
-    position: 'French Teacher',
-    department: 'Languages',
-    phoneNumber: '080-6789-0123',
-    email: 'fatima.bello@edunaija.com',
-    dateEmployed: new Date('2019-09-01'),
-    status: 'active',
-    qualification: 'B.A. French',
-    photo: 'https://randomuser.me/api/portraits/women/28.jpg',
-  },
-  {
-    id: 'TCH007',
-    staffId: 'STF2024007',
-    firstName: 'Emeka',
-    lastName: 'Eze',
-    position: 'Physical Education Teacher',
-    department: 'Physical Education',
-    phoneNumber: '080-7890-1234',
-    email: 'emeka.eze@edunaija.com',
-    dateEmployed: new Date('2018-09-01'),
-    status: 'onLeave',
-    qualification: 'B.Sc. Physical Education',
-    photo: 'https://randomuser.me/api/portraits/men/55.jpg',
-  },
-  {
-    id: 'TCH008',
-    staffId: 'STF2024008',
-    firstName: 'Amina',
-    lastName: 'Ibrahim',
-    position: 'Chemistry Teacher',
-    department: 'Sciences',
-    phoneNumber: '080-8901-2345',
-    email: 'amina.ibrahim@edunaija.com',
-    dateEmployed: new Date('2020-09-01'),
-    status: 'active',
-    qualification: 'B.Sc. Chemistry',
-    photo: 'https://randomuser.me/api/portraits/women/33.jpg',
-  },
+  // ... other teachers
 ];
 
 const TeachersPage: React.FC = () => {
@@ -151,10 +70,17 @@ const TeachersPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-neutral-900">Teachers</h1>
               <p className="text-neutral-500">Manage your teaching staff information</p>
             </div>
-            <div className="mt-4 sm:mt-0">
+            <div className="mt-4 sm:mt-0 space-x-2">
+              <Link 
+                to="/teachers/assign" 
+                className="btn-outline flex items-center inline-flex"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Assign Teacher
+              </Link>
               <Link 
                 to="/teachers/new" 
-                className="btn-primary flex items-center"
+                className="btn-primary flex items-center inline-flex"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add New Teacher
@@ -198,9 +124,7 @@ const TeachersPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <button 
-                  className="btn-outline flex items-center"
-                >
+                <button className="btn-outline flex items-center">
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </button>
@@ -238,93 +162,85 @@ const TeachersPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-neutral-200">
-                  {filteredTeachers.length > 0 ? (
-                    filteredTeachers.map((teacher) => (
-                      <tr key={teacher.id} className="hover:bg-neutral-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <img className="h-10 w-10 rounded-full" src={teacher.photo} alt="" />
+                  {filteredTeachers.map((teacher) => (
+                    <tr key={teacher.id} className="hover:bg-neutral-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img className="h-10 w-10 rounded-full" src={teacher.photo} alt="" />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-neutral-900">
+                              {teacher.firstName} {teacher.lastName}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-neutral-900">
-                                {teacher.firstName} {teacher.lastName}
-                              </div>
-                              <div className="text-sm text-neutral-500">
-                                {teacher.email}
-                              </div>
+                            <div className="text-sm text-neutral-500">
+                              {teacher.email}
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                          {teacher.staffId}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                          {teacher.position}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                          {teacher.department}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                          {teacher.phoneNumber}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            teacher.status === 'active' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {teacher.status === 'active' ? 'Active' : 'On Leave'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="relative">
-                            <button
-                              onClick={() => toggleDropdown(teacher.id)}
-                              className="text-neutral-500 hover:text-neutral-700 focus:outline-none"
-                            >
-                              <MoreHorizontal className="h-5 w-5" />
-                            </button>
-                            {activeDropdown === teacher.id && (
-                              <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                <div className="py-1" role="menu" aria-orientation="vertical">
-                                  <Link
-                                    to={`/teachers/${teacher.id}`}
-                                    className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
-                                    role="menuitem"
-                                  >
-                                    <Eye className="mr-3 h-4 w-4 text-neutral-500" />
-                                    View Details
-                                  </Link>
-                                  <Link
-                                    to={`/teachers/${teacher.id}/edit`}
-                                    className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
-                                    role="menuitem"
-                                  >
-                                    <Edit className="mr-3 h-4 w-4 text-neutral-500" />
-                                    Edit
-                                  </Link>
-                                  <button
-                                    className="flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-neutral-100"
-                                    role="menuitem"
-                                  >
-                                    <Trash className="mr-3 h-4 w-4 text-red-500" />
-                                    Delete
-                                  </button>
-                                </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                        {teacher.staffId}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                        {teacher.position}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                        {teacher.department}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                        {teacher.phoneNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          teacher.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {teacher.status === 'active' ? 'Active' : 'On Leave'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleDropdown(teacher.id)}
+                            className="text-neutral-500 hover:text-neutral-700 focus:outline-none"
+                          >
+                            <MoreHorizontal className="h-5 w-5" />
+                          </button>
+                          {activeDropdown === teacher.id && (
+                            <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                              <div className="py-1" role="menu" aria-orientation="vertical">
+                                <Link
+                                  to={`/teachers/${teacher.id}`}
+                                  className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                                  role="menuitem"
+                                >
+                                  <Eye className="mr-3 h-4 w-4 text-neutral-500" />
+                                  View Details
+                                </Link>
+                                <Link
+                                  to={`/teachers/${teacher.id}/edit`}
+                                  className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                                  role="menuitem"
+                                >
+                                  <Edit className="mr-3 h-4 w-4 text-neutral-500" />
+                                  Edit
+                                </Link>
+                                <button
+                                  className="flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-neutral-100"
+                                  role="menuitem"
+                                >
+                                  <Trash className="mr-3 h-4 w-4 text-red-500" />
+                                  Delete
+                                </button>
                               </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-neutral-500">
-                        No teachers found matching your criteria.
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -371,9 +287,10 @@ const TeachersPage: React.FC = () => {
         </div>
       } />
       
-      <Route path="/new" element={<div>New Teacher Form</div>} />
+      <Route path="/new" element={<AddEditTeacher />} />
+      <Route path="/assign" element={<AssignTeacher />} />
+      <Route path="/:id/edit" element={<AddEditTeacher />} />
       <Route path="/:id" element={<div>Teacher Detail</div>} />
-      <Route path="/:id/edit" element={<div>Edit Teacher</div>} />
     </Routes>
   );
 };

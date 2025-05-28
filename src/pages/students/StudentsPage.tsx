@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Download, Filter, Plus, Search, UserPlus } from 'lucide-react';
-import { format } from 'date-fns';
 import StudentsList from './StudentsList';
+import AddEditStudent from './AddEditStudent';
 
 const StudentsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,9 +77,9 @@ const StudentsPage: React.FC = () => {
         </div>
       } />
       
-      <Route path="/new" element={<div>New Student Form</div>} />
+      <Route path="/new" element={<AddEditStudent />} />
+      <Route path="/:id/edit" element={<AddEditStudent />} />
       <Route path="/:id" element={<div>Student Detail</div>} />
-      <Route path="/:id/edit" element={<div>Edit Student</div>} />
     </Routes>
   );
 };
