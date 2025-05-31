@@ -26,7 +26,7 @@ function App() {
               <Layout />
             </ProtectedRoute>
           }>
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<Navigate to="/dashboard\" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="students/*" element={<StudentsPage />} />
             <Route path="teachers/*" element={<TeachersPage />} />
@@ -38,7 +38,7 @@ function App() {
             <Route path="timetable/*" element={<TimetablePage />} />
           </Route>
           
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard\" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
