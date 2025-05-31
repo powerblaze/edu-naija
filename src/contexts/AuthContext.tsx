@@ -1,78 +1,102 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { User, UserRole } from '../types';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
+  session: Session | null;
   user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, role: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  loading: boolean;
   error: string | null;
 }
-
-const mockUser: User = {
-  id: 'admin-001',
-  username: 'admin',
-  fullName: 'School Administrator',
-  email: 'admin@edunaija.com',
-  role: UserRole.ADMIN,
-  avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-  lastLogin: new Date(),
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (username: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+  const signUp = async (email: string, password: string, fullName: string, role: string) => {
     try {
-      // In a real app, you would make an API call here
-      // This is just a mock implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (username === 'admin' && password === 'password') {
-        setUser(mockUser);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-      } else {
-        throw new Error('Invalid username or password');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
-      throw err;
-    } finally {
-      setIsLoading(false);
+      setError(null);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during sign up');
+      throw error;
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const signIn = async (email: string, password: string) => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during sign in');
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during sign out');
+      throw error;
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
+        session,
         user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        logout,
-        error,
+        signIn,
+        signUp,
+        signOut,
+        loading,
+        error
       }}
     >
       {children}
@@ -80,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
