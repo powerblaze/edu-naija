@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   session: Session | null;
@@ -10,6 +11,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -70,6 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
+      // Redirect to dashboard after successful login
+      navigate('/dashboard');
+
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during sign in');
       throw error;
@@ -81,6 +87,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Redirect to login page after sign out
+      navigate('/login');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during sign out');
       throw error;
@@ -96,7 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signOut,
         loading,
-        error
+        error,
+        isAuthenticated: !!session
       }}
     >
       {children}
