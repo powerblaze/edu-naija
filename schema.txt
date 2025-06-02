@@ -1,0 +1,140 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+-- run from the bottom up!!! create auth users separately for testing
+
+CREATE TABLE public.assessments (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  student_id uuid,
+  subject_id uuid,
+  class_id uuid,
+  term text NOT NULL CHECK (term = ANY (ARRAY['First'::text, 'Second'::text, 'Third'::text])),
+  academic_year text NOT NULL,
+  assessment_type text NOT NULL CHECK (assessment_type = ANY (ARRAY['CA1'::text, 'CA2'::text, 'CA3'::text, 'Exam'::text])),
+  score numeric NOT NULL CHECK (score >= 0::numeric),
+  max_score numeric NOT NULL CHECK (max_score > 0::numeric),
+  date date NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT assessments_pkey PRIMARY KEY (id),
+  CONSTRAINT assessments_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.subjects(id),
+  CONSTRAINT assessments_class_id_fkey FOREIGN KEY (class_id) REFERENCES public.classes(id),
+  CONSTRAINT assessments_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id)
+);
+CREATE TABLE public.classes (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  name text NOT NULL,
+  level text NOT NULL CHECK (level = ANY (ARRAY['Primary'::text, 'Junior Secondary'::text, 'Senior Secondary'::text])),
+  section text NOT NULL,
+  academic_year text NOT NULL,
+  class_teacher_id uuid,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT classes_pkey PRIMARY KEY (id),
+  CONSTRAINT classes_class_teacher_id_fkey FOREIGN KEY (class_teacher_id) REFERENCES public.teachers(id)
+);
+CREATE TABLE public.results (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  student_id uuid,
+  subject_id uuid,
+  class_id uuid,
+  term text NOT NULL CHECK (term = ANY (ARRAY['First'::text, 'Second'::text, 'Third'::text])),
+  academic_year text NOT NULL,
+  ca1 numeric NOT NULL CHECK (ca1 >= 0::numeric AND ca1 <= 15::numeric),
+  ca2 numeric NOT NULL CHECK (ca2 >= 0::numeric AND ca2 <= 15::numeric),
+  ca3 numeric NOT NULL CHECK (ca3 >= 0::numeric AND ca3 <= 10::numeric),
+  exam numeric NOT NULL CHECK (exam >= 0::numeric AND exam <= 60::numeric),
+  total numeric NOT NULL CHECK (total >= 0::numeric AND total <= 100::numeric),
+  grade text NOT NULL,
+  remarks text NOT NULL,
+  position integer NOT NULL,
+  teacher_comment text,
+  principal_comment text,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT results_pkey PRIMARY KEY (id),
+  CONSTRAINT results_class_id_fkey FOREIGN KEY (class_id) REFERENCES public.classes(id),
+  CONSTRAINT results_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id),
+  CONSTRAINT results_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.subjects(id)
+);
+CREATE TABLE public.students (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid,
+  registration_number text NOT NULL UNIQUE,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  middle_name text,
+  date_of_birth date NOT NULL,
+  gender text NOT NULL CHECK (gender = ANY (ARRAY['male'::text, 'female'::text])),
+  class_id uuid,
+  admission_date date NOT NULL,
+  status text NOT NULL CHECK (status = ANY (ARRAY['active'::text, 'inactive'::text, 'graduated'::text, 'suspended'::text])),
+  boarding_status text NOT NULL CHECK (boarding_status = ANY (ARRAY['day'::text, 'boarding'::text])),
+  address text NOT NULL,
+  phone_number text,
+  email text,
+  medical_information text,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT students_pkey PRIMARY KEY (id),
+  CONSTRAINT students_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT fk_student_class FOREIGN KEY (class_id) REFERENCES public.classes(id)
+);
+CREATE TABLE public.subjects (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  code text NOT NULL UNIQUE,
+  name text NOT NULL,
+  description text,
+  level text NOT NULL CHECK (level = ANY (ARRAY['Primary'::text, 'Junior Secondary'::text, 'Senior Secondary'::text])),
+  department text NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT subjects_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.teacher_subjects (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  teacher_id uuid,
+  subject_id uuid,
+  class_id uuid,
+  academic_year text NOT NULL,
+  term text NOT NULL CHECK (term = ANY (ARRAY['First'::text, 'Second'::text, 'Third'::text])),
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT teacher_subjects_pkey PRIMARY KEY (id),
+  CONSTRAINT teacher_subjects_class_id_fkey FOREIGN KEY (class_id) REFERENCES public.classes(id),
+  CONSTRAINT teacher_subjects_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES public.teachers(id),
+  CONSTRAINT teacher_subjects_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.subjects(id)
+);
+CREATE TABLE public.teachers (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid,
+  staff_id text NOT NULL UNIQUE,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  middle_name text,
+  date_of_birth date NOT NULL,
+  gender text NOT NULL CHECK (gender = ANY (ARRAY['male'::text, 'female'::text])),
+  qualification text NOT NULL,
+  position text NOT NULL,
+  department text NOT NULL,
+  date_employed date NOT NULL,
+  status text NOT NULL CHECK (status = ANY (ARRAY['active'::text, 'inactive'::text, 'on_leave'::text])),
+  address text NOT NULL,
+  phone_number text NOT NULL,
+  email text NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT teachers_pkey PRIMARY KEY (id),
+  CONSTRAINT teachers_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.users (
+  id uuid NOT NULL,
+  full_name text NOT NULL,
+  avatar_url text,
+  role text NOT NULL CHECK (role = ANY (ARRAY['admin'::text, 'teacher'::text, 'student'::text, 'parent'::text])),
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT users_pkey PRIMARY KEY (id),
+  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+
+
